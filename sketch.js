@@ -1,30 +1,43 @@
 let samplesPerCycle = 100;
+let cycleInTwoPi = 10;
 let wave;
 let period;
 let count;
-let freqGranularity = .1;
+let freqGranularity = .01;
 let fft = new Array(samplesPerCycle * 2);
+
+
 function setup() {
   createCanvas(windowWidth, windowHeight - 4);
   background(220);
   stroke(0);
   fill(255);
   fft.fill(0, 0, fft.length);
+  period = TWO_PI / samplesPerCycle;
+  count = samplesPerCycle * cycleInTwoPi;
+  let func = x => Math.sin(x / 10) + 7
+  wave = generateSamples(0, period, count, func);
+  wave = normalizeWave(wave);
+
+
+}
+function normalizeWave(wave) {
+  const avg = average(wave);
+  for (let index = 0; index < wave.length; index++) {
+    wave[index] -= avg;
+  }
+  return wave;
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight - 4);
 }
 function draw() {
   background(220);
-  period = TWO_PI / samplesPerCycle;
-  count = samplesPerCycle;
-  let func = x => Math.sin(x)
-  wave = generateSamples(0, period, count, func);
   const freq = (frameCount * freqGranularity);
   const avg = drawCircle(wave, freq);
   fft[frameCount - 1] = avg.mag();
   if (avg.mag() > .2) {
-    print(freq/TWO_PI);
+    print(Math.round(freq / TWO_PI, freqGranularity));
   }
   drawWave(wave);
   drawWave(fft, 2);
@@ -47,7 +60,10 @@ function drawCircle(wave, rate) {
   translate(width / 2, height / 2);
   let x = [];
   let y = [];
-  let zoom = width / 7;
+  let zoom = Math.min(width / 7, height / 2.2);
+  const min = Math.min(...wave);
+  const max = Math.max(...wave);
+  // zoom /= (max - min);
   for (let index = 1; index < wave.length; index++) {
     const start = createVector(wave[index - 1] * zoom);
     start.rotate(rate * (index - 1));
