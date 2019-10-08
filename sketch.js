@@ -1,9 +1,9 @@
 let wave;
-let samplesPerCycle = 96;
-let cycleInTwoPi = 10;
-let freqGranularity = .1;
-let fft = new Array(samplesPerCycle / freqGranularity / 2);
-
+const sampleFreq = 100;
+const cycles = 10;
+const fftGranularity = .1;
+const fft = new Array(sampleFreq / fftGranularity / 2);
+const func = x => Math.sin(x * 17.5) + Math.sin(x * 11) + Math.sin(x * 5);
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 4);
@@ -11,11 +11,8 @@ function setup() {
   stroke(0);
   fill(255);
   fft.fill(0, 0, fft.length);
-  period = TWO_PI / samplesPerCycle;
-  count = samplesPerCycle * cycleInTwoPi;
-  let func;
-  func = x => Math.sin(x);
-  func = x => Math.sin(x * 17) + Math.sin(x * 11) + Math.sin(x * 5);
+  period = TWO_PI / sampleFreq;
+  count = sampleFreq * cycles;
   wave = generateSamples(0, period, count, func);
   normalizeWave(wave);
 }
@@ -24,7 +21,7 @@ function windowResized() {
 }
 function draw() {
   background(220);
-  const freq = Math.min(frameCount, fft.length) * freqGranularity;
+  const freq = Math.min(frameCount, fft.length) * fftGranularity;
   const avg = drawCircle(wave, freq);
   const v = Math.abs(avg.mag());
   drawWave(wave, 0);
@@ -36,8 +33,8 @@ function draw() {
   else {
     fft[frameCount - 1] = v;
   }
-  drawAxis(0, cycleInTwoPi, "ms", 0, div);
-  drawAxis(0, fft.length * freqGranularity, "kHz", 2, div);
+  drawAxis(0, cycles, "ms", 0, div);
+  drawAxis(0, fft.length * fftGranularity, "kHz", 2, div);
 }
 function clamp(num, min, max) {
   return num <= min ? min : num >= max ? max : num;
@@ -84,7 +81,7 @@ function drawCircle(wave, rate) {
     // stroke(color(i, 1, 1, .5))
     stroke(100, 100, 100, 100 * 255 / wave.length)
     const end = createVector(wave[i]);
-    end.rotate(rate * i * TWO_PI * cycleInTwoPi / wave.length);
+    end.rotate(rate * i * TWO_PI * cycles / wave.length);
     circle(end.x * zoom, end.y * zoom, zoom / 80);
     x.push(end.x);
     y.push(end.y);
