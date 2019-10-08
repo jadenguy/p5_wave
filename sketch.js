@@ -120,16 +120,22 @@ function drawAxis(low, high, unit, third = 0, divisor = 10) {
   const xStart = width / 3 * third;
   const yStart = height - 2;
   translate(xStart, yStart);
-  line(0, -10, width / 3, -10);
+  // line(0, -10, width / 3, -10);
   const delta = high - low;
-  const quarter = delta / divisor;
-  for (let i = 0; i < divisor; i++) {
+  const u = delta / divisor;
+  for (let i = 0; i <= divisor; i++) {
     const place = i * width / 3 / divisor;
     // print(place * index, low + index * quarter);
     stroke(50);
     line(place, 0, place, -height);
     noStroke();
-    text((low + i * quarter) + " " + unit, place, 0);
+    const dividerText = String(round_to_precision(low + i * u, u ));
+
+    text(dividerText.substring(0, 3) + " " + unit, place, 0);
   }
   pop();
+}
+function round_to_precision(x, precision) {
+  var y = +x + (precision === undefined ? 0.5 : precision / 2);
+  return y - (y % (precision === undefined ? 1 : +precision));
 }
