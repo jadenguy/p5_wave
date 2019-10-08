@@ -1,11 +1,12 @@
 let wave;
-let samplesPerCycle = 360;
-let cycleInTwoPi = 2;
-let freqGranularity = .00005;
-let fft = new Array(samplesPerCycle * 2);
+let samplesPerCycle = 100;
+let cycleInTwoPi = 1;
+let freqGranularity = .01;
+let fft = new Array(samplesPerCycle);
 
 
 function setup() {
+  textAlign(CENTER, TOP);
   createCanvas(windowWidth, windowHeight - 4);
   background(220);
   stroke(0);
@@ -13,8 +14,8 @@ function setup() {
   fft.fill(0, 0, fft.length);
   period = TWO_PI / samplesPerCycle;
   count = samplesPerCycle * cycleInTwoPi;
-  // let func = x => Math.sin(x * 3) + Math.sin(x * 7)
-  let func = x => Math.sin(x)
+  let func = x => Math.sin(x * 7) + 2 * Math.sin(x * 11)
+  // let func = x => Math.sin(x)
   wave = generateSamples(0, period, count, func);
   wave = normalizeWave(wave);
 }
@@ -32,7 +33,9 @@ function draw() {
   }
   drawWave(wave, 0);
   drawWave(fft, 2);
-  if (freq >= samplesPerCycle * 2 / freqGranularity) {
+  drawAxis(0, cycleInTwoPi, "PI", 0);
+  drawAxis(0, fft.length * freqGranularity, "Cycle", 2);
+  if (freq >= 20) {
     noLoop();
     print(frameCount, freq, v);
   }
@@ -69,6 +72,9 @@ function drawCircle(wave, rate) {
   let x = [];
   let y = [];
   let zoom = Math.min(width / 7, height / 2.2);
+  fill(color(0, 0, 0, 0));
+  ellipseMode(RADIUS);
+  circle(0, 0, zoom);
   for (let index = 0; index < wave.length; index++) {
     // const start = createVector(wave[index - 1] * zoom);
     // start.rotate(rate * (index - 1));
@@ -76,19 +82,18 @@ function drawCircle(wave, rate) {
     // x.push(start.x);
     // y.push(start.y);
     // }
-    const end = createVector(wave[index] * zoom);
-    end.rotate(rate * index);
-    point(end.x, end.y);
+    const end = createVector(wave[index]);
+    end.rotate(rate * index * TWO_PI / wave.length);
+    point(end.x * zoom, end.y * zoom);
     x.push(end.x);
     y.push(end.y);
 
   }
-  ellipseMode(RADIUS);
   strokeWeight(2);
   fill(255);
   const xAvg = average(x);
   const yAvg = average(y)
-  circle(xAvg, yAvg, 10);
+  circle(xAvg * zoom, yAvg * zoom, zoom / 30);
   pop();
   return createVector(xAvg / zoom, yAvg / zoom);
 }
@@ -99,13 +104,32 @@ function drawWave(wave, third = 0) {
   const zoom = .9 * height / (max - min);
   const xStart = width / 3 * third;
   const yStart = height * .95 + min * zoom;
-
   translate(xStart, yStart);
   const newWidth = width / wave.length / 3;
   for (let index = 1; index < wave.length; index++) {
     const start = createVector(newWidth * (index - 1), wave[index - 1] * -zoom);
     const end = createVector(newWidth * index, wave[index] * -zoom);
     line(start.x, start.y, end.x, end.y);
+  }
+  pop();
+}
+function drawAxis(low, high, unit, third = 0, divisor = 10) {
+  push();
+  fill(0);
+  stroke(50);
+  const xStart = width / 3 * third;
+  const yStart = height - 2;
+  translate(xStart, yStart);
+  line(0, -10, width / 3, -10);
+  const delta = high - low;
+  const quarter = delta / divisor;
+  for (let i = 0; i < divisor; i++) {
+    const place = i * width / 3 / divisor;
+    // print(place * index, low + index * quarter);
+    stroke(50);
+    line(place, 0, place, -height);
+    noStroke();
+    text((low + i * quarter) + " " + unit, place, 0);
   }
   pop();
 }
