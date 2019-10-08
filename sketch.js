@@ -1,7 +1,7 @@
 let wave;
-let samplesPerCycle = 100;
-let cycleInTwoPi = 1;
-let freqGranularity = .01;
+let samplesPerCycle = 96;
+let cycleInTwoPi = 10;
+let freqGranularity = .1;
 let fft = new Array(samplesPerCycle / freqGranularity / 2);
 
 
@@ -13,16 +13,18 @@ function setup() {
   fft.fill(0, 0, fft.length);
   period = TWO_PI / samplesPerCycle;
   count = samplesPerCycle * cycleInTwoPi;
-  let func = x => 70 * Math.sin(x * 17) + 50 * Math.sin(x * 11) + 100 * Math.sin(x * 5);
+  let func;
+  func = x => Math.sin(x);
+  func = x => Math.sin(x * 17) + Math.sin(x * 11) + Math.sin(x * 5);
   wave = generateSamples(0, period, count, func);
-  wave = normalizeWave(wave);
+  normalizeWave(wave);
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight - 4);
 }
 function draw() {
   background(220);
-  const freq = frameCount * freqGranularity;
+  const freq = Math.min(frameCount, fft.length) * freqGranularity;
   const avg = drawCircle(wave, freq);
   const v = Math.abs(avg.mag());
   drawWave(wave, 0);
@@ -30,13 +32,12 @@ function draw() {
   const div = Math.floor(width / 230);
   if (frameCount >= fft.length) {
     noLoop();
-    print(frameCount, freq, v);
   }
   else {
     fft[frameCount - 1] = v;
   }
-  drawAxis(0, cycleInTwoPi * 2, "PI", 0, div);
-  drawAxis(0, fft.length * freqGranularity, "Cycle", 2, div);
+  drawAxis(0, cycleInTwoPi, "ms", 0, div);
+  drawAxis(0, fft.length * freqGranularity, "kHz", 2, div);
 }
 function clamp(num, min, max) {
   return num <= min ? min : num >= max ? max : num;
@@ -78,10 +79,12 @@ function drawCircle(wave, rate) {
   fill(color(0, 0, 0, 0));
   ellipseMode(RADIUS);
   circle(0, 0, zoom * 1.1);
-  stroke(color(20, 20, 20, 100))
-  for (let index = 0; index < wave.length; index++) {
-    const end = createVector(wave[index]);
-    end.rotate(rate * index * TWO_PI * cycleInTwoPi / wave.length);
+  // colorMode(HSB, wave.length, 1, 1, 1)
+  for (let i = 0; i < wave.length; i++) {
+    // stroke(color(i, 1, 1, .5))
+    stroke(100, 100, 100, 100 * 255 / wave.length)
+    const end = createVector(wave[i]);
+    end.rotate(rate * i * TWO_PI * cycleInTwoPi / wave.length);
     circle(end.x * zoom, end.y * zoom, zoom / 80);
     x.push(end.x);
     y.push(end.y);
@@ -90,6 +93,7 @@ function drawCircle(wave, rate) {
   fill(255);
   const xAvg = average(x);
   const yAvg = average(y)
+  // colorMode(RGB)
   stroke(20)
   circle(xAvg * zoom, yAvg * zoom, zoom / 30);
   pop();
@@ -113,7 +117,7 @@ function drawWave(wave, third = 0) {
 }
 function drawAxis(low, high, unit, third = 0, divisor = 10) {
   push();
-  textAlign(LEFT, BOTTOM);
+  textAlign(RIGHT, BOTTOM);
   textFont('courier');
   fill(0);
   stroke(50);
