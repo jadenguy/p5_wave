@@ -1,12 +1,11 @@
 let wave;
 let samplesPerCycle = 100;
 let cycleInTwoPi = 1;
-let freqGranularity = .01;
-let fft = new Array(samplesPerCycle);
+let freqGranularity = .1;
+let fft = new Array(samplesPerCycle / freqGranularity / 2);
 
 
 function setup() {
-  textAlign(CENTER, TOP);
   createCanvas(windowWidth, windowHeight - 4);
   background(220);
   stroke(0);
@@ -14,7 +13,7 @@ function setup() {
   fft.fill(0, 0, fft.length);
   period = TWO_PI / samplesPerCycle;
   count = samplesPerCycle * cycleInTwoPi;
-  let func = x => Math.sin(x * 7) + 2 * Math.sin(x * 11)
+  let func = x => 70 * Math.sin(x * 17) + 50 * Math.sin(x * 11) + 100 * Math.sin(x * 5)
   // let func = x => Math.sin(x)
   wave = generateSamples(0, period, count, func);
   wave = normalizeWave(wave);
@@ -33,9 +32,10 @@ function draw() {
   }
   drawWave(wave, 0);
   drawWave(fft, 2);
-  drawAxis(0, cycleInTwoPi, "PI", 0);
-  drawAxis(0, fft.length * freqGranularity, "Cycle", 2);
-  if (freq >= 20) {
+  const div = Math.floor(width / 200);
+  drawAxis(0, cycleInTwoPi, "PI", 0, div);
+  drawAxis(0, fft.length * freqGranularity, "Cycle", 2, div);
+  if (frameCount >= fft.length) {
     noLoop();
     print(frameCount, freq, v);
   }
@@ -44,7 +44,12 @@ function clamp(num, min, max) {
   return num <= min ? min : num >= max ? max : num;
 }
 function average(arr) {
-  return arr.reduce((a, b) => a + b, 0) / arr.length
+  return arr.reduce((a,
+    b) => a + b, 0) / arr.length
+}
+function round_to_precision(x, precision = 1) {
+  var y = +x + (precision / 2);
+  return y - (y % (+precision));
 }
 function generateSamples(start, period, count, func) {
   var ret = [];
@@ -74,7 +79,7 @@ function drawCircle(wave, rate) {
   let zoom = Math.min(width / 7, height / 2.2);
   fill(color(0, 0, 0, 0));
   ellipseMode(RADIUS);
-  circle(0, 0, zoom);
+  circle(0, 0, zoom * 1.1);
   for (let index = 0; index < wave.length; index++) {
     // const start = createVector(wave[index - 1] * zoom);
     // start.rotate(rate * (index - 1));
@@ -83,8 +88,8 @@ function drawCircle(wave, rate) {
     // y.push(start.y);
     // }
     const end = createVector(wave[index]);
-    end.rotate(rate * index * TWO_PI / wave.length);
-    point(end.x * zoom, end.y * zoom);
+    end.rotate(rate * index * TWO_PI * cycleInTwoPi / wave.length);
+    circle(end.x * zoom, end.y * zoom, zoom / 80);
     x.push(end.x);
     y.push(end.y);
 
@@ -115,12 +120,13 @@ function drawWave(wave, third = 0) {
 }
 function drawAxis(low, high, unit, third = 0, divisor = 10) {
   push();
+  textAlign(LEFT, BOTTOM);
+  textFont('courier');
   fill(0);
   stroke(50);
   const xStart = width / 3 * third;
   const yStart = height - 2;
   translate(xStart, yStart);
-  // line(0, -10, width / 3, -10);
   const delta = high - low;
   const u = delta / divisor;
   for (let i = 0; i <= divisor; i++) {
@@ -129,13 +135,8 @@ function drawAxis(low, high, unit, third = 0, divisor = 10) {
     stroke(50);
     line(place, 0, place, -height);
     noStroke();
-    const dividerText = String(round_to_precision(low + i * u, u ));
-
-    text(dividerText.substring(0, 3) + " " + unit, place, 0);
+    const dividerText = String(round_to_precision(low + i * u, u)).substring(0, 4) + " " + unit;
+    text(dividerText, place, 0);
   }
   pop();
-}
-function round_to_precision(x, precision) {
-  var y = +x + (precision === undefined ? 0.5 : precision / 2);
-  return y - (y % (precision === undefined ? 1 : +precision));
 }
