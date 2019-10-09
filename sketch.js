@@ -1,9 +1,9 @@
 let wave;
 const sampleFreq = 100;
-const cycles = 10;
+const cycles = .2;
 const fftGranularity = .1;
 const fft = new Array(sampleFreq / fftGranularity / 2);
-const func = x => Math.sin(x * 17.5) + Math.sin(x * 11) + Math.sin(x * 5);
+const func = x => Math.sin(x * 17.5) + Math.sin(x * 11) + Math.sin(x * 5)+ Math.sin(x * 40);
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 4);
