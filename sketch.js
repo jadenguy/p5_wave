@@ -1,10 +1,10 @@
 let wave;
 let fftIndex = 0;
-const sampleFreq = 100;
+const sampleFreq = 96;
 const cycles = .2;
-//const fftGranularity = 1 / sampleFreq;
 const fft = new Array(Math.floor(sampleFreq * sampleFreq / 2));
 const fftSpeedup = 20;
+//where x is the time frame per cycle, e.g.: milliseconds resulting in 1 cycle per second = 1khz
 const func = x => 10 * Math.sin(x * 17.5) + 5 * Math.sin(x * 11) + 30 * Math.sin(x * 5) + 8 * Math.sin(x * 40);
 
 function setup() {
@@ -13,8 +13,8 @@ function setup() {
   stroke(0);
   fill(255);
   fft.fill(0, 0, fft.length);
-  period = TWO_PI / sampleFreq;
-  count = sampleFreq * cycles;
+  const period = TWO_PI / sampleFreq;
+  const count = sampleFreq * cycles;
   wave = generateSamples(0, period, count, func);
   normalizeWave(wave);
 }
@@ -29,7 +29,7 @@ function draw() {
     const freq = fftIndex / sampleFreq;
     const avg = drawCircle(wave, freq);
     const v = Math.abs(avg.mag());
-    if (fftIndex >= fft.length) {
+    if (fftIndex > fft.length) {
       noLoop();
     }
     else {
@@ -82,8 +82,8 @@ function drawCircle(wave, rate) {
   fill(color(0, 0, 0, 0));
   ellipseMode(RADIUS);
   circle(0, 0, zoom * 1.1);
+  stroke(100, 100, 100, 10)
   for (let i = 0; i < wave.length; i++) {
-    stroke(100, 100, 100, 10 * 255 / wave.length)
     const end = createVector(wave[i]);
     end.rotate(rate * i * TWO_PI * cycles / wave.length);
     circle(end.x * zoom, end.y * zoom, zoom / 80);
