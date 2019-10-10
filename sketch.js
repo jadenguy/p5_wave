@@ -2,8 +2,8 @@ let wave;
 const sampleFreq = 100;
 const cycles = .2;
 const fftGranularity = .1;
-const fft = new Array(sampleFreq / fftGranularity / 2);
-const func = x => Math.sin(x * 17.5) + Math.sin(x * 11) + Math.sin(x * 5)+ Math.sin(x * 40);
+const fft = new Array(Math.floor(sampleFreq / fftGranularity / 2));
+const func = x => 10 * Math.sin(x * 17.5) + 5 * Math.sin(x * 11) + 30 * Math.sin(x * 5) + 8 * Math.sin(x * 40);
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 4);
@@ -24,8 +24,6 @@ function draw() {
   const freq = Math.min(frameCount, fft.length) * fftGranularity;
   const avg = drawCircle(wave, freq);
   const v = Math.abs(avg.mag());
-  drawWave(wave, 0);
-  drawWave(fft, 2);
   const div = Math.floor(width / 230);
   if (frameCount >= fft.length) {
     noLoop();
@@ -33,6 +31,8 @@ function draw() {
   else {
     fft[frameCount - 1] = v;
   }
+  drawWave(wave, 0);
+  drawWave(fft, 2);
   drawAxis(0, cycles, "ms", 0, div);
   drawAxis(0, fft.length * fftGranularity, "kHz", 2, div);
 }
@@ -123,6 +123,7 @@ function drawAxis(low, high, unit, third = 0, divisor = 10) {
   translate(xStart, yStart);
   const delta = high - low;
   const u = delta / divisor;
+  line(0, height / -22, width / 3, height / -22);
   for (let i = 0; i <= divisor; i++) {
     const place = i * width / 3 / divisor;
     // print(place * index, low + index * quarter);
