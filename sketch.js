@@ -3,9 +3,9 @@ let fftIndex = 0;
 const sampleFreq = 96;
 const cycles = .2;
 const fft = new Array(Math.floor(sampleFreq * sampleFreq / 2));
-const fftSpeedup = 20;
+const fftSpeedup = fft.length / 60;
 //where x is the time frame per cycle, e.g.: milliseconds resulting in 1 cycle per second = 1khz
-const func = x => 10 * Math.sin(x * 17.5) + 5 * Math.sin(x * 11) + 30 * Math.sin(x * 5) + 8 * Math.sin(x * 40);
+const func = x => 10 * Math.sin(x * 17.5) + 5 * Math.sin(x * 11) + 30 * Math.sin(x * 5) + 8 * Math.sin(x * 40) + 20 * Math.sin(x * 75);
 
 function setup() {
   createCanvas(windowWidth, windowHeight - 4);
