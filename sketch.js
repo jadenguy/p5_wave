@@ -1,10 +1,10 @@
 let wave;
 let fftIndex = 0;
 const sampleFreq = 96;
-const cycles = .2;
+const cycles = 1;
 const fft = new Array(Math.floor(sampleFreq * sampleFreq / 2));
 const fftSpeedup = fft.length / 60;
-//where x is the time frame per cycle, e.g.: milliseconds resulting in 1 cycle per second = 1khz
+//where x is the sample millisecond, so a sin (x) == 1 khz sine wave of magnitude 1
 const func = x => 10 * Math.sin(x * 17.5) + 5 * Math.sin(x * 11) + 30 * Math.sin(x * 5) + 8 * Math.sin(x * 40) + 20 * Math.sin(x * 75);
 
 function setup() {
